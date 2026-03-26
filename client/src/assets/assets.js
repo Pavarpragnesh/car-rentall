@@ -113,7 +113,32 @@ export const ownerMenuLinks = [
     coloredIcon: assets.map_icon_colored
   }
 ]
-
+export const adminMenuLinks = [
+  {
+    name: "Dashboard",
+    path: "/admin",
+    icon: dashboardIcon,
+    coloredIcon: dashboardIconColored
+  },
+  {
+    name: "Users",
+    path: "/admin/users",
+    icon: users_icon,                 // ✅ FIXED
+    coloredIcon: users_icon           // (no colored version available)
+  },
+  {
+    name: "Cars",
+    path: "/admin/cars",
+    icon: carIcon,
+    coloredIcon: carIconColored
+  },
+  {
+    name: "Bookings",
+    path: "/admin/bookings",
+    icon: listIcon,
+    coloredIcon: listIconColored
+  }
+];
 export const dummyUserData = {
   "_id": "6847f7cab3d8daecdb517095",
   "name": "GreatStack",

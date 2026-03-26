@@ -4,13 +4,17 @@ import jwt from 'jsonwebtoken'
 import Car from "../models/Car.js";
 
 
-// Generate JWT Token
-const generateToken = (userId)=>{
-    const payload = userId;
-    return jwt.sign(payload, process.env.JWT_SECRET)
+// ✅ Generate JWT Token (WITH ROLE)
+const generateToken = (user)=>{
+    return jwt.sign(
+        { id: user._id, role: user.role }, // ✅ include role
+        process.env.JWT_SECRET,
+        { expiresIn: "7d" }
+    )
 }
 
-// Register User
+
+// ✅ Register User
 export const registerUser = async (req, res)=>{
     try {
         const {name, email, password} = req.body
@@ -25,9 +29,20 @@ export const registerUser = async (req, res)=>{
         }
 
         const hashedPassword = await bcrypt.hash(password, 10)
-        const user = await User.create({name, email, password: hashedPassword})
-        const token = generateToken(user._id.toString())
-        res.json({success: true, token})
+
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword
+        })
+
+        const token = generateToken(user)
+
+        res.json({
+            success: true,
+            token,
+            role: user.role   // ✅ send role
+        })
 
     } catch (error) {
         console.log(error.message);
@@ -35,38 +50,49 @@ export const registerUser = async (req, res)=>{
     }
 }
 
-// Login User 
+
+// ✅ Login User (ADMIN INCLUDED)
 export const loginUser = async (req, res)=>{
     try {
         const {email, password} = req.body
+
         const user = await User.findOne({email})
         if(!user){
-            return res.json({success: false, message: "User not found" })
+            return res.json({success: false, message: "User not found"})
         }
+
         const isMatch = await bcrypt.compare(password, user.password)
         if(!isMatch){
-            return res.json({success: false, message: "Invalid Credentials" })
+            return res.json({success: false, message: "Invalid Credentials"})
         }
-        const token = generateToken(user._id.toString())
-        res.json({success: true, token})
+
+        const token = generateToken(user)
+
+        res.json({
+            success: true,
+            token,
+            role: user.role   // ✅ important for frontend
+        })
+
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
     }
 }
 
-// Get User data using Token (JWT)
+
+// ✅ Get User Data (Protected)
 export const getUserData = async (req, res) =>{
     try {
-        const {user} = req;
-        res.json({success: true, user})
+        res.json({success: true, user: req.user})
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
     }
 }
 
-// Get All Cars for the Frontend
+
+// ✅ Get All Cars
 export const getCars = async (req, res) =>{
     try {
         const cars = await Car.find({isAvaliable: true})
