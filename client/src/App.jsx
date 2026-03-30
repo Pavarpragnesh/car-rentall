@@ -14,6 +14,7 @@ import ManageBookings from './pages/owner/ManageBookings'
 import Login from './components/Login'
 import AddLocation from './pages/owner/AddLocation'
 import ManageLocations from './pages/owner/ManageLocations'
+import Users from './components/admin/Users'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
 
@@ -57,6 +58,7 @@ const App = () => {
         {/* ✅ ADMIN WITH SIDEBAR */}
         <Route path='/admin' element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path='/admin/users' element={<Users />} />
         </Route>
 
       </Routes>
