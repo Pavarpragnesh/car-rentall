@@ -1,12 +1,23 @@
+import Booking from "../models/Booking.js";
 import User from "../models/User.js";
 import Car from "../models/Car.js";
-import Booking from "../models/Booking.js";
 
 export const getAdminDashboard = async (req, res) => {
     try {
-        const totalCars = await Car.countDocuments();
+        const bookings = await Booking.find()
+            .populate("car")
+            .sort({ createdAt: -1 });
+
+        const totalBookings = bookings.length;
+        const pendingBookings = bookings.filter(b => b.status === "pending").length;
+        const completedBookings = bookings.filter(b => b.status === "confirmed").length;
+
         const totalUsers = await User.countDocuments();
-        const totalBookings = await Booking.countDocuments();
+        const totalCars = await Car.countDocuments();
+
+        const monthlyRevenue = bookings
+            .filter(b => b.status === "confirmed")
+            .reduce((acc, b) => acc + b.price, 0);
 
         res.json({
             success: true,
@@ -14,10 +25,10 @@ export const getAdminDashboard = async (req, res) => {
                 totalCars,
                 totalUsers,
                 totalBookings,
-                pendingBookings: 0,
-                completedBookings: 0,
-                recentBookings: [],
-                monthlyRevenue: 0
+                pendingBookings,
+                completedBookings,
+                recentBookings: bookings.slice(0, 5),
+                monthlyRevenue
             }
         });
 
@@ -86,5 +97,27 @@ export const updateUser = async (req, res) => {
 
     } catch (error) {
         res.json({ success: false, message: error.message });
+    }
+};
+
+// ✅ Get All Bookings (Admin)
+export const getAllBookings = async (req, res) => {
+    try {
+        const bookings = await Booking.find()
+            .populate("car")
+            .populate("user", "name email")
+            .populate("owner", "name email")
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            bookings
+        });
+
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message
+        });
     }
 };
