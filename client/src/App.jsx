@@ -22,6 +22,7 @@ import { useAppContext } from './context/AppContext'
 import AdminLayout from './pages/admin/Layout'
 import AdminDashboard from './components/admin/Dashboard'
 import Bookings from './components/admin/Bookings'
+import Cars1 from './components/admin/Cars'
 
 const App = () => {
 
@@ -61,6 +62,7 @@ const App = () => {
           <Route index element={<AdminDashboard />} />
           <Route path='/admin/users' element={<Users />} />
           <Route path='/admin/bookings' element={<Bookings />} />
+          <Route path='/admin/cars' element={<Cars1 />} />
         </Route>
 
       </Routes>

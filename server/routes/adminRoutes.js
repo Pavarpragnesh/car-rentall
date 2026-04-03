@@ -2,7 +2,7 @@ import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import { getAllUsers,toggleUserStatus, 
   deleteUser, 
-  updateUser,getAdminDashboard } from "../controllers/adminController.js";
+  updateUser,getAdminDashboard,getAllCars, toggleCarStatus, deleteCarAdmin } from "../controllers/adminController.js";
 import User from "../models/User.js";
 import { getAllBookings } from "../controllers/adminController.js";
 const adminRouter = express.Router();
@@ -22,5 +22,8 @@ adminRouter.post("/toggle-user", protect,adminOnly, toggleUserStatus);
 adminRouter.post("/delete-user", protect,adminOnly, deleteUser);
 adminRouter.post("/update-user", protect,adminOnly, updateUser);
 adminRouter.get("/bookings", protect, getAllBookings);
+adminRouter.get("/cars", protect,adminOnly, getAllCars);
+adminRouter.post("/toggle-car", protect,adminOnly,toggleCarStatus);
+adminRouter.post("/delete-car", protect, adminOnly,deleteCarAdmin);
 
 export default adminRouter; 

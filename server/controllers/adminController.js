@@ -121,3 +121,60 @@ export const getAllBookings = async (req, res) => {
         });
     }
 };
+
+// ✅ Get All Cars (Admin)
+export const getAllCars = async (req, res) => {
+    try {
+        const cars = await Car.find()
+            .populate("owner", "name email")
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            cars
+        });
+
+    } catch (error) {
+        res.json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+export const toggleCarStatus = async (req, res) => {
+    try {
+        const { carId } = req.body;
+
+        const car = await Car.findById(carId);
+
+        car.isAvaliable = !car.isAvaliable;
+
+        await car.save();
+
+        res.json({
+            success: true,
+            message: "Car status updated",
+            isAvaliable: car.isAvaliable
+        });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
+
+export const deleteCarAdmin = async (req, res) => {
+    try {
+        const { carId } = req.body;
+
+        await Car.findByIdAndDelete(carId);
+
+        res.json({
+            success: true,
+            message: "Car deleted"
+        });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};
