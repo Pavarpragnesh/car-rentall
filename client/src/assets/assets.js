@@ -142,7 +142,7 @@ export const adminMenuLinks = [
     name: "Add Location",
     path: "/admin/add-location",
     icon: location_icon,
-    coloredIcon: location_colored_icon,
+    coloredIcon: assets.location_colored_icon || assets.listIcon,
   },
   {
     name: "Manage Locations",
