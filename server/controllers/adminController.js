@@ -1,7 +1,7 @@
 import Booking from "../models/Booking.js";
 import User from "../models/User.js";
 import Car from "../models/Car.js";
-
+import Location from "../models/Location.js";
 export const getAdminDashboard = async (req, res) => {
     try {
         const bookings = await Booking.find()
@@ -177,4 +177,74 @@ export const deleteCarAdmin = async (req, res) => {
     } catch (error) {
         res.json({ success: false, message: error.message });
     }
+};
+
+// ✅ Get All Locations
+export const getAllLocations = async (req, res) => {
+  try {
+    const locations = await Location.find().sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      locations
+    });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Add Location
+export const addLocation = async (req, res) => {
+  try {
+    const { name, address } = req.body;
+
+    await Location.create({ name, address });
+
+    res.json({
+      success: true,
+      message: "Location added successfully"
+    });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Toggle Location
+export const toggleLocation = async (req, res) => {
+  try {
+    const { locationId } = req.body;
+
+    const location = await Location.findById(locationId);
+
+    location.isAvailable = !location.isAvailable;
+
+    await location.save();
+
+    res.json({
+      success: true,
+      message: "Status updated"
+    });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
+// ✅ Delete Location
+export const deleteLocation = async (req, res) => {
+  try {
+    const { locationId } = req.body;
+
+    await Location.findByIdAndDelete(locationId);
+
+    res.json({
+      success: true,
+      message: "Location deleted"
+    });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
 };

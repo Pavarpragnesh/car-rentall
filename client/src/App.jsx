@@ -23,6 +23,9 @@ import AdminLayout from './pages/admin/Layout'
 import AdminDashboard from './components/admin/Dashboard'
 import Bookings from './components/admin/Bookings'
 import Cars1 from './components/admin/Cars'
+import AdminAddLocation from './components/admin/AddLocation'
+import AdminManageLocations from './components/admin/ManageLocations'
+import Rating from './components/admin/Rating'
 
 const App = () => {
 
@@ -63,6 +66,10 @@ const App = () => {
           <Route path='/admin/users' element={<Users />} />
           <Route path='/admin/bookings' element={<Bookings />} />
           <Route path='/admin/cars' element={<Cars1 />} />
+           <Route path='/admin/add-location' element={<AdminAddLocation />} />
+          <Route path='/admin/manage-locations' element={<AdminManageLocations />} />
+          <Route path='/admin/ratings' element={<Rating />} />
+
         </Route>
 
       </Routes>

@@ -5,6 +5,13 @@ import { getAllUsers,toggleUserStatus,
   updateUser,getAdminDashboard,getAllCars, toggleCarStatus, deleteCarAdmin } from "../controllers/adminController.js";
 import User from "../models/User.js";
 import { getAllBookings } from "../controllers/adminController.js";
+import {
+  getAllLocations,
+  addLocation,
+  toggleLocation,
+  deleteLocation
+} from "../controllers/adminController.js";
+
 const adminRouter = express.Router();
 
 adminRouter.get("/users", protect,adminOnly, getAllUsers);
@@ -25,5 +32,8 @@ adminRouter.get("/bookings", protect, getAllBookings);
 adminRouter.get("/cars", protect,adminOnly, getAllCars);
 adminRouter.post("/toggle-car", protect,adminOnly,toggleCarStatus);
 adminRouter.post("/delete-car", protect, adminOnly,deleteCarAdmin);
-
+adminRouter.get("/locations", protect, adminOnly,getAllLocations);
+adminRouter.post("/add-location", protect, adminOnly, addLocation);
+adminRouter.post("/toggle-location", protect,adminOnly, toggleLocation);
+adminRouter.post("/delete-location", protect,adminOnly, deleteLocation);
 export default adminRouter; 

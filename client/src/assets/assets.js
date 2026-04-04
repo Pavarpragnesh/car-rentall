@@ -137,7 +137,25 @@ export const adminMenuLinks = [
     path: "/admin/bookings",
     icon: listIcon,
     coloredIcon: listIconColored
-  }
+  },
+   {
+    name: "Add Location",
+    path: "/admin/add-location",
+    icon: location_icon,
+    coloredIcon: location_colored_icon,
+  },
+  {
+    name: "Manage Locations",
+    path: "/admin/manage-locations",
+    icon: assets.map_icon || assets.list_icon,
+   coloredIcon: assets.location_colored_icon || assets.plus_icon,
+  },
+  {
+    name: "Ratings",
+    path: "/admin/ratings",
+    icon: assets.star_icon || assets.list_icon,
+    coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
+  },
 ];
 export const dummyUserData = {
   "_id": "6847f7cab3d8daecdb517095",
