@@ -99,19 +99,19 @@ export const ownerMenuLinks = [
     { name: "Add car", path: "/owner/add-car", icon: addIcon, coloredIcon: addIconColored },
     { name: "Manage Cars", path: "/owner/manage-cars", icon: carIcon, coloredIcon: carIconColored },
     { name: "Manage Bookings", path: "/owner/manage-bookings", icon: listIcon, coloredIcon: listIconColored },
-    // ✅ NEW LOCATION MENU
-  {
-    name: "Add Location",
-    path: "/owner/add-location",
-    icon: assets.location_icon,
-    coloredIcon: assets.location_icon_colored
-  },
-  {
-    name: "Manage Locations",
-    path: "/owner/manage-locations",
-    icon: assets.map_icon,
-    coloredIcon: assets.map_icon_colored
-  }
+  //   // ✅ NEW LOCATION MENU
+  // {
+  //   name: "Add Location",
+  //   path: "/owner/add-location",
+  //   icon: assets.location_icon,
+  //   coloredIcon: assets.location_icon_colored
+  // },
+  // {
+  //   name: "Manage Locations",
+  //   path: "/owner/manage-locations",
+  //   icon: assets.map_icon,
+  //   coloredIcon: assets.map_icon_colored
+  // }
 ]
 export const adminMenuLinks = [
   {

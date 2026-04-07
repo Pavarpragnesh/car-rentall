@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Title from '../../components/owner/Title'
 import { assets } from '../../assets/assets'
 import { useAppContext } from '../../context/AppContext'
@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 const AddCar = () => {
 
   const {axios, currency} = useAppContext()
-
+const [locations, setLocations] = useState([])
   const [image, setImage] = useState(null)
   const [car, setCar] = useState({
     brand: '',
@@ -59,6 +59,24 @@ const AddCar = () => {
       setIsLoading(false)
     }
   }
+
+  const fetchLocations = async () => {
+  try {
+    const { data } = await axios.get('/api/location/list')
+
+    if (data.success) {
+      setLocations(data.locations)
+    } else {
+      toast.error(data.message)
+    }
+  } catch (error) {
+    toast.error(error.message)
+  }
+}
+
+useEffect(() => {
+  fetchLocations()
+}, [])
 
   return (
     <div className='px-4 py-10 md:px-10 flex-1'>
@@ -141,13 +159,21 @@ const AddCar = () => {
          {/* Car Location */}
          <div className='flex flex-col w-full'>
             <label>Location</label>
-            <select onChange={e=> setCar({...car, location: e.target.value})} value={car.location} className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none'>
-              <option value="">Select a location</option>
-              <option value="New York">New York</option>
-              <option value="Los Angeles">Los Angeles</option>
-              <option value="Houston">Houston</option>
-              <option value="Chicago">Chicago</option>
-            </select>
+            <select
+                onChange={e => setCar({ ...car, location: e.target.value })}
+                value={car.location}
+                className='px-3 py-2 mt-1 border border-borderColor rounded-md outline-none'
+              >
+                <option value="">Select a location</option>
+
+                {locations
+                  .filter(loc => loc.isAvailable) // only available locations
+                  .map((loc) => (
+                    <option key={loc._id} value={loc.name}>
+                      {loc.name} ( {loc.address} )
+                    </option>
+                ))}
+              </select>
          </div>
         {/* Car Description */}
          <div className='flex flex-col w-full'>

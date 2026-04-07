@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState , useEffect } from 'react'
 import { assets, cityList } from '../assets/assets'
 import { useAppContext } from '../context/AppContext'
 import {motion} from 'motion/react'
@@ -6,14 +6,29 @@ import {motion} from 'motion/react'
 const Hero = () => {
 
     const [pickupLocation, setPickupLocation] = useState('')
-
-    const {pickupDate, setPickupDate, returnDate, setReturnDate, navigate} = useAppContext()
+    const [locations, setLocations] = useState([])
+    const {pickupDate, setPickupDate, returnDate, setReturnDate, navigate, axios } = useAppContext()
 
     const handleSearch = (e)=>{
         e.preventDefault()
         navigate('/cars?pickupLocation=' + pickupLocation + '&pickupDate=' + pickupDate + '&returnDate=' + returnDate)
     }
 
+    const fetchLocations = async () => {
+        try {
+            const { data } = await axios.get('/api/location/list')
+
+            if (data.success) {
+            setLocations(data.locations)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        }
+
+    useEffect(() => {
+    fetchLocations()
+    }, [])        
   return (
     <motion.div 
     initial={{ opacity: 0 }}
@@ -35,9 +50,22 @@ const Hero = () => {
 
         <div className='flex flex-col md:flex-row items-start md:items-center gap-10 min-md:ml-8'>
             <div className='flex flex-col items-start gap-2'>
-                <select required value={pickupLocation} onChange={(e)=>setPickupLocation(e.target.value)}>
-                    <option value="">Pickup Location</option>
-                    {cityList.map((city)=> <option key={city} value={city}>{city}</option>)}
+                <select
+                required
+                value={pickupLocation}
+                onChange={(e)=>setPickupLocation(e.target.value)}
+                >
+                <option value="">
+                    {locations.length === 0 ? "Loading..." : "Pickup Location"}
+                </option>
+
+                {locations
+                    .filter(loc => loc.isAvailable)
+                    .map((loc)=> (
+                    <option key={loc._id} value={loc.name}>
+                        {loc.name} ( {loc.address} )
+                    </option>
+                ))}
                 </select>
                 <p className='px-1 text-sm text-gray-500'>{pickupLocation ? pickupLocation : 'Please select location'}</p>
             </div>

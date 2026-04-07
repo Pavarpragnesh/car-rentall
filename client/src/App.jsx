@@ -12,8 +12,8 @@ import AddCar from './pages/owner/AddCar'
 import ManageCars from './pages/owner/ManageCars'
 import ManageBookings from './pages/owner/ManageBookings'
 import Login from './components/Login'
-import AddLocation from './pages/owner/AddLocation'
-import ManageLocations from './pages/owner/ManageLocations'
+// import AddLocation from './pages/owner/AddLocation'
+// import ManageLocations from './pages/owner/ManageLocations'
 import Users from './components/admin/Users'
 import { Toaster } from 'react-hot-toast'
 import { useAppContext } from './context/AppContext'
@@ -56,8 +56,8 @@ const App = () => {
           <Route path="add-car" element={<AddCar />} />
           <Route path="manage-cars" element={<ManageCars />} />
           <Route path="manage-bookings" element={<ManageBookings />} />
-          <Route path="add-location" element={<AddLocation />} />
-          <Route path="manage-locations" element={<ManageLocations />} />
+          {/* <Route path="add-location" element={<AddLocation />} />
+          <Route path="manage-locations" element={<ManageLocations />} /> */}
         </Route>
 
         {/* ✅ ADMIN WITH SIDEBAR */}
