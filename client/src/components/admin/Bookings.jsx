@@ -50,6 +50,7 @@ const Bookings = () => {
                 <th>Pickup</th>
                 <th>Return</th>
                 <th>Price</th>
+                <th>Reting</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -85,6 +86,33 @@ const Bookings = () => {
                   </td>
 
                   <td>₹{item.price}</td>
+
+                  {/* ⭐ Rating & Review */}
+                <td className='p-3 max-md:hidden'>
+                  {item.rating ? (
+                    <div className='flex flex-col gap-1'>
+
+                      {/* Stars */}
+                      <div className='flex gap-1 text-yellow-400'>
+                        {[...Array(item.rating)].map((_, i) => (
+                          <span key={i}>★</span>
+                        ))}
+                      </div>
+
+                      {/* Review */}
+                      {item.review && (
+                        <p className='text-xs text-gray-500 italic'>
+                          "{item.review}"
+                        </p>
+                      )}
+
+                    </div>
+                  ) : (
+                    <span className='text-xs text-gray-400'>
+                      No rating
+                    </span>
+                  )}
+                </td>
 
                   {/* ✅ Status */}
                   <td>

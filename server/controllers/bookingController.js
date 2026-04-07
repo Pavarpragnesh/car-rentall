@@ -115,3 +115,39 @@ export const changeBookingStatus = async (req, res)=>{
         res.json({success: false, message: error.message})
     }
 }
+
+export const addRating = async (req, res) => {
+    try {
+        const { bookingId, rating, review } = req.body;
+
+        const booking = await Booking.findById(bookingId);
+
+        if (!booking) {
+            return res.json({ success: false, message: "Booking not found" });
+        }
+
+        // ✅ Check if already rated
+        if (booking.rating) {
+            return res.json({ success: false, message: "Already rated" });
+        }
+
+        // ✅ Check conditions
+        if (booking.status !== "confirmed") {
+            return res.json({ success: false, message: "Booking not completed" });
+        }
+
+        if (new Date(booking.returnDate) > new Date()) {
+            return res.json({ success: false, message: "Rental period not finished" });
+        }
+
+        booking.rating = rating;
+        booking.review = review;
+
+        await booking.save();
+
+        res.json({ success: true, message: "Rating submitted" });
+
+    } catch (error) {
+        res.json({ success: false, message: error.message });
+    }
+};

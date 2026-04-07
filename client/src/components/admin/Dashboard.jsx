@@ -147,6 +147,7 @@ const Dashboard = () => {
                 <th>Pickup</th>
                 <th>Return</th>
                 <th>Price</th>
+                <th>Reting</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -164,6 +165,32 @@ const Dashboard = () => {
                   <td>{new Date(item.returnDate).toLocaleDateString()}</td>
 
                   <td>{currency}{item.price}</td>
+
+                  <td className='p-3 max-md:hidden'>
+                  {item.rating ? (
+                    <div className='flex flex-col gap-1'>
+
+                      {/* Stars */}
+                      <div className='flex gap-1 text-yellow-400'>
+                        {[...Array(item.rating)].map((_, i) => (
+                          <span key={i}>★</span>
+                        ))}
+                      </div>
+
+                      {/* Review */}
+                      {item.review && (
+                        <p className='text-xs text-gray-500 italic'>
+                          "{item.review}"
+                        </p>
+                      )}
+
+                    </div>
+                  ) : (
+                    <span className='text-xs text-gray-400'>
+                      No rating
+                    </span>
+                  )}
+                </td>
 
                   <td>
                     <span className={`px-2 py-1 text-xs rounded ${
