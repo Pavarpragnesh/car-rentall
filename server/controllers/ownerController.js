@@ -55,11 +55,46 @@ export const addCar = async (req, res)=>{
 }
 
 // API to List Owner Cars
-export const getOwnerCars = async (req, res)=>{
+// export const getOwnerCars = async (req, res)=>{
+//     try {
+//         const {_id} = req.user;
+//         const cars = await Car.find({owner: _id })
+//         res.json({success: true, cars})
+//     } catch (error) {
+//         console.log(error.message);
+//         res.json({success: false, message: error.message})
+//     }
+// }
+export const getOwnerCars = async (req, res) =>{
     try {
         const {_id} = req.user;
-        const cars = await Car.find({owner: _id })
-        res.json({success: true, cars})
+
+        const cars = await Car.find({ owner: _id });
+
+        const carsWithRatings = await Promise.all(
+            cars.map(async (car) => {
+                const bookings = await Booking.find({
+                    car: car._id,
+                    rating: { $exists: true }
+                });
+
+                const totalReviews = bookings.length;
+
+                const avgRating =
+                    totalReviews > 0
+                        ? bookings.reduce((acc, item) => acc + item.rating, 0) / totalReviews
+                        : 0;
+
+                return {
+                    ...car.toObject(),
+                    avgRating: Number(avgRating.toFixed(1)),
+                    totalReviews
+                };
+            })
+        );
+
+        res.json({ success: true, cars: carsWithRatings });
+
     } catch (error) {
         console.log(error.message);
         res.json({success: false, message: error.message})
