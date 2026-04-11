@@ -156,6 +156,12 @@ export const adminMenuLinks = [
     icon: assets.star_icon || assets.list_icon,
     coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
   },
+  {
+    name: "Terms",
+    path: "/admin/Terms",
+    icon: assets.star_icon || assets.list_icon,
+    coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
+  },
 ];
 export const dummyUserData = {
   "_id": "6847f7cab3d8daecdb517095",
