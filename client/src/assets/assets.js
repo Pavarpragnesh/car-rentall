@@ -151,16 +151,16 @@ export const adminMenuLinks = [
    coloredIcon: assets.location_colored_icon || assets.plus_icon,
   },
   {
-    name: "Ratings",
-    path: "/admin/ratings",
-    icon: assets.star_icon || assets.list_icon,
-    coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
+    name: "Offers",
+    path: "/admin/offers",
+    // icon: assets.star_icon || assets.list_icon,
+    // coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
   },
   {
     name: "Terms",
     path: "/admin/Terms",
-    icon: assets.star_icon || assets.list_icon,
-    coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
+    // icon: assets.star_icon || assets.list_icon,
+    // coloredIcon: assets.star_colored_icon || assets.list_colored_icon,
   },
 ];
 export const dummyUserData = {

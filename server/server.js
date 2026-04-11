@@ -8,6 +8,7 @@ import ownerRouter from "./routes/ownerRoutes.js";
 import bookingRouter from "./routes/bookingRoutes.js";
 import locationRouter from "./routes/locationRoutes.js";
 import termsRouter from "./routes/termsRoutes.js";
+import offerRoutes from "./routes/offerRoutes.js";
 
 // ✅ ADD THIS
 import adminRouter from "./routes/adminRoutes.js";
@@ -31,7 +32,7 @@ app.use('/api/owner', ownerRouter)
 app.use('/api/bookings', bookingRouter)
 app.use("/api/location", locationRouter)
 app.use("/api/terms", termsRouter);
-
+app.use("/api/offers", offerRoutes);
 // ✅ VERY IMPORTANT (THIS FIXES YOUR ERROR)
 app.use('/api/admin', adminRouter)
 
