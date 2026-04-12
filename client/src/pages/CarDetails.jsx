@@ -9,47 +9,71 @@ import { motion } from 'motion/react'
 const CarDetails = () => {
 
   const { id } = useParams()
-
   const { cars, axios, pickupDate, setPickupDate, returnDate, setReturnDate } = useAppContext()
 
   const navigate = useNavigate()
   const [car, setCar] = useState(null)
   const currency = import.meta.env.VITE_CURRENCY
 
-  // ✅ Terms states
-  const [agreeTerms, setAgreeTerms] = useState(false)
-  const [showTerms, setShowTerms] = useState(false)
-  const [termsContent, setTermsContent] = useState("")
+  const [offerCode, setOfferCode] = useState("")
+  const [appliedOffer, setAppliedOffer] = useState(null)
+  const [discountAmount, setDiscountAmount] = useState(0)
 
-  // ✅ Fetch Terms
-  const fetchTerms = async () => {
+  const [agreeTerms, setAgreeTerms] = useState(false)
+
+  // ✅ APPLY OFFER
+  const handleApplyOffer = async () => {
+    if (!offerCode) return toast.error("Enter offer code")
+
     try {
-      const { data } = await axios.get("/api/terms")
+      const { data } = await axios.post("/api/offers/apply", { code: offerCode })
+
       if (data.success) {
-        setTermsContent(data.terms?.content || "")
+        const offer = data.offer
+
+        let discount = 0
+
+        if (offer.discountType === "flat") {
+          discount = offer.discountValue
+        } else {
+          discount = (car.pricePerDay * offer.discountValue) / 100
+        }
+
+        if (discount > car.pricePerDay) {
+          discount = car.pricePerDay
+        }
+
+        setAppliedOffer(offer)
+        setDiscountAmount(discount)
+
+        toast.success("Offer applied")
+      } else {
+        toast.error(data.message)
       }
-    } catch (error) {
-      console.error(error)
+    } catch (err) {
+      toast.error(err.message)
     }
   }
 
-  useEffect(() => {
-    if (showTerms) fetchTerms()
-  }, [showTerms])
+  const removeOffer = () => {
+    setAppliedOffer(null)
+    setDiscountAmount(0)
+    setOfferCode("")
+  }
 
-  // ✅ Submit
+  const finalPrice = car ? car.pricePerDay - discountAmount : 0
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!agreeTerms) {
-      return toast.error("Please accept Terms & Conditions")
-    }
+    if (!agreeTerms) return toast.error("Accept Terms")
 
     try {
       const { data } = await axios.post('/api/bookings/create', {
         car: id,
         pickupDate,
-        returnDate
+        returnDate,
+        offer: appliedOffer?._id || null
       })
 
       if (data.success) {
@@ -58,8 +82,8 @@ const CarDetails = () => {
       } else {
         toast.error(data.message)
       }
-    } catch (error) {
-      toast.error(error.message)
+    } catch (err) {
+      toast.error(err.message)
     }
   }
 
@@ -68,158 +92,111 @@ const CarDetails = () => {
   }, [cars, id])
 
   return car ? (
-    <>
-      <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-16'>
+    <div className='px-6 md:px-16 lg:px-24 xl:px-32 mt-16'>
 
-        <button onClick={() => navigate(-1)} className='flex items-center gap-2 mb-6 text-gray-500 cursor-pointer'>
-          <img src={assets.arrow_icon} className='rotate-180 opacity-65' />
-          Back to all cars
-        </button>
+      {/* BACK */}
+      <button onClick={() => navigate(-1)} className='flex items-center gap-2 mb-6 text-gray-500 hover:text-black'>
+        <img src={assets.arrow_icon} className='rotate-180 w-4 opacity-60' />
+        Back to cars
+      </button>
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-10'>
 
-          {/* LEFT */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className='lg:col-span-2'
-          >
-            <img
-              src={car.image}
-              className='w-full md:max-h-100 object-cover rounded-xl mb-6 shadow-md'
-            />
+        {/* LEFT */}
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className='lg:col-span-2 space-y-6'>
+          <img src={car.image} className='w-full h-[420px] object-cover rounded-2xl shadow-lg' />
 
-            <div className='space-y-6'>
-              <div>
-                <h1 className='text-3xl font-bold'>{car.brand} {car.model}</h1>
-                <p className='text-gray-500 text-lg'>{car.category} • {car.year}</p>
-              </div>
+          <div className='bg-white rounded-2xl p-6 shadow-md space-y-4'>
+            <h1 className='text-3xl font-bold'>{car.brand} {car.model}</h1>
+            <p className='text-gray-500'>{car.category} • {car.year}</p>
 
-              <hr className='border-borderColor my-6' />
-
-              <div className='grid grid-cols-2 sm:grid-cols-4 gap-4'>
-                {[
-                  { icon: assets.users_icon, text: `${car.seating_capacity} Seats` },
-                  { icon: assets.fuel_icon, text: car.fuel_type },
-                  { icon: assets.car_icon, text: car.transmission },
-                  { icon: assets.location_icon, text: car.location },
-                ].map(({ icon, text }) => (
-                  <div key={text} className='flex flex-col items-center bg-light p-4 rounded-lg'>
-                    <img src={icon} className='h-5 mb-2' />
-                    {text}
-                  </div>
-                ))}
-              </div>
-
-              <div>
-                <h1 className='text-xl font-medium mb-3'>Description</h1>
-                <p className='text-gray-500'>{car.description}</p>
-              </div>
+            <div className='grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4'>
+              {[
+                { icon: assets.users_icon, text: `${car.seating_capacity} Seats` },
+                { icon: assets.fuel_icon, text: car.fuel_type },
+                { icon: assets.car_icon, text: car.transmission },
+                { icon: assets.location_icon, text: car.location },
+              ].map(({ icon, text }) => (
+                <div key={text} className='flex flex-col items-center bg-gray-50 p-4 rounded-xl'>
+                  <img src={icon} className='h-5 mb-2 opacity-70' />
+                  <p className='text-sm'>{text}</p>
+                </div>
+              ))}
             </div>
-          </motion.div>
 
-          {/* RIGHT FORM */}
-          <motion.form
-            onSubmit={handleSubmit}
-            className='shadow-lg h-max sticky top-18 rounded-xl p-6 space-y-6 text-gray-500'
-          >
+            <p className='text-gray-500 text-sm'>{car.description}</p>
+          </div>
+        </motion.div>
 
-            <p className='flex items-center justify-between text-2xl text-gray-800 font-semibold'>
-              {currency}{car.pricePerDay}
-              <span className='text-base text-gray-400 font-normal'>per day</span>
-            </p>
+        {/* RIGHT */}
+        <motion.form onSubmit={handleSubmit} className='sticky top-20 bg-white shadow-xl rounded-2xl p-6 space-y-6'>
 
-            <hr className='border-borderColor my-6' />
+          {/* PRICE */}
+          <div>
+            {appliedOffer ? (
+              <>
+                <p className='line-through text-gray-400'>{currency}{car.pricePerDay}</p>
+                <p className='text-3xl font-bold text-green-600'>{currency}{finalPrice}</p>
+                <p className='text-sm text-green-600'>You saved {currency}{discountAmount}</p>
+              </>
+            ) : (
+              <p className='text-3xl font-bold'>{currency}{car.pricePerDay}</p>
+            )}
+          </div>
 
-            <div className='flex flex-col gap-2'>
-              <label>Pickup Date</label>
+          {/* DATES */}
+          <div className='space-y-3'>
+            <div>
+              <label className='text-sm'>Pickup Date</label>
+              <input type="date" value={pickupDate} onChange={(e)=>setPickupDate(e.target.value)} className='w-full border rounded-lg px-3 py-2 mt-1' required />
+            </div>
+
+            <div>
+              <label className='text-sm'>Return Date</label>
+              <input type="date" value={returnDate} onChange={(e)=>setReturnDate(e.target.value)} className='w-full border rounded-lg px-3 py-2 mt-1' required />
+            </div>
+          </div>
+
+          {/* OFFER */}
+          <div className='bg-gray-50 p-4 rounded-xl space-y-3'>
+            <label className='text-sm font-medium'>Offer Code</label>
+
+            <div className='flex gap-2'>
               <input
-                value={pickupDate}
-                onChange={(e) => setPickupDate(e.target.value)}
-                type="date"
-                className='border px-3 py-2 rounded-lg'
-                required
-                min={new Date().toISOString().split('T')[0]}
+                type="text"
+                value={offerCode}
+                onChange={(e)=>setOfferCode(e.target.value)}
+                disabled={appliedOffer}
+                className='flex-1 border rounded-lg px-3 py-2'
               />
-            </div>
 
-            <div className='flex flex-col gap-2'>
-              <label>Return Date</label>
-              <input
-                value={returnDate}
-                onChange={(e) => setReturnDate(e.target.value)}
-                type="date"
-                className='border px-3 py-2 rounded-lg'
-                required
-              />
-            </div>
-
-            {/* ✅ TERMS */}
-            <div className='flex items-start gap-2 text-sm'>
-              <input
-                type="checkbox"
-                checked={agreeTerms}
-                onChange={(e) => setAgreeTerms(e.target.checked)}
-                className="mt-1"
-              />
-              <p>
-                I agree to the{" "}
-                <span
-                  onClick={() => setShowTerms(true)}
-                  className="text-blue-600 underline cursor-pointer"
-                >
-                  Terms & Conditions
-                </span>
-              </p>
-            </div>
-
-            <button
-              disabled={!agreeTerms}
-              className={`w-full py-3 font-medium text-white rounded-xl ${
-                agreeTerms
-                  ? "bg-primary hover:bg-primary-dull"
-                  : "bg-gray-400 cursor-not-allowed"
-              }`}
-            >
-              Book Now
-            </button>
-
-            <p className='text-center text-sm'>No credit card required</p>
-
-          </motion.form>
-        </div>
-      </div>
-
-      {/* ✅ FIXED SCROLL MODAL */}
-      {showTerms && (
-        <div
-          className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center px-4"
-          onClick={() => setShowTerms(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-white w-full max-w-3xl h-[85vh] rounded-xl shadow-lg flex flex-col"
-          >
-
-            {/* HEADER */}
-            <div className="flex justify-between items-center p-4 border-b bg-white shrink-0">
-              <h2 className="text-lg font-semibold">Terms & Conditions</h2>
-              <button onClick={() => setShowTerms(false)}>✕</button>
-            </div>
-
-            {/* SCROLL AREA */}
-            <div className="flex-1 overflow-y-auto p-5 text-sm text-gray-700">
-              {termsContent ? (
-                <div dangerouslySetInnerHTML={{ __html: termsContent }} />
+              {!appliedOffer ? (
+                <button type="button" onClick={handleApplyOffer} className='bg-black text-white px-4 rounded-lg'>
+                  Apply
+                </button>
               ) : (
-                "Loading..."
+                <button type="button" onClick={removeOffer} className='bg-red-500 text-white px-4 rounded-lg'>
+                  Remove
+                </button>
               )}
             </div>
 
+            {appliedOffer && <p className='text-green-600 text-sm'>✓ {appliedOffer.code} applied</p>}
           </div>
-        </div>
-      )}
-    </>
+
+          {/* TERMS */}
+          <div className='flex items-start gap-2 text-sm'>
+            <input type="checkbox" checked={agreeTerms} onChange={(e)=>setAgreeTerms(e.target.checked)} />
+            <p>I agree to Terms & Conditions</p>
+          </div>
+
+          <button disabled={!agreeTerms} className={`w-full py-3 rounded-xl text-white ${agreeTerms ? 'bg-blue-600' : 'bg-gray-400'}`}>
+            Book Now
+          </button>
+
+        </motion.form>
+      </div>
+    </div>
   ) : <Loader />
 }
 

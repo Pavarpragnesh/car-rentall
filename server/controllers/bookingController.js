@@ -1,6 +1,6 @@
 import Booking from "../models/Booking.js"
 import Car from "../models/Car.js";
-
+import Offer from "../models/offer.js";
 
 // Function to Check Availability of Car for a given Date
 const checkAvailability = async (car, pickupDate, returnDate)=>{
@@ -38,33 +38,80 @@ export const checkAvailabilityOfCar = async (req, res)=>{
 }
 
 // API to Create Booking
-export const createBooking = async (req, res)=>{
-    try {
-        const {_id} = req.user;
-        const {car, pickupDate, returnDate} = req.body;
+// ✅ CREATE BOOKING (FINAL)
+export const createBooking = async (req, res) => {
+  try {
+    const { _id } = req.user;
+    const { car, pickupDate, returnDate, offer } = req.body;
 
-        const isAvailable = await checkAvailability(car, pickupDate, returnDate)
-        if(!isAvailable){
-            return res.json({success: false, message: "Car is not available"})
-        }
+    const carData = await Car.findById(car);
 
-        const carData = await Car.findById(car)
-
-        // Calculate price based on pickupDate and returnDate
-        const picked = new Date(pickupDate);
-        const returned = new Date(returnDate);
-        const noOfDays = Math.ceil((returned - picked) / (1000 * 60 * 60 * 24))
-        const price = carData.pricePerDay * noOfDays;
-
-        await Booking.create({car, owner: carData.owner, user: _id, pickupDate, returnDate, price})
-
-        res.json({success: true, message: "Booking Created"})
-
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
+    if (!carData) {
+      return res.json({ success: false, message: "Car not found" });
     }
-}
+
+    // ✅ IMPORTANT FIX: ensure number
+    let basePrice = Number(carData.pricePerDay) || 0;
+
+    if (basePrice <= 0) {
+      return res.json({ success: false, message: "Invalid car price" });
+    }
+
+    let totalPrice = basePrice;
+    let discountAmount = 0;
+    let offerData = null;
+
+    // ✅ APPLY OFFER
+    if (offer) {
+      offerData = await Offer.findById(offer);
+
+      if (offerData && offerData.isActive) {
+        const today = new Date();
+
+        if (today >= offerData.startDate && today <= offerData.endDate) {
+
+          if (offerData.discountType === "flat") {
+            discountAmount = Number(offerData.discountValue) || 0;
+          } else {
+            discountAmount = (basePrice * Number(offerData.discountValue || 0)) / 100;
+          }
+
+          // ✅ prevent negative
+          if (discountAmount > basePrice) {
+            discountAmount = basePrice;
+          }
+
+          totalPrice = basePrice - discountAmount;
+        }
+      }
+    }
+
+    // ✅ FINAL SAFETY
+    if (totalPrice < 0) totalPrice = 0;
+
+    await Booking.create({
+      car,
+      owner: carData.owner,
+      user: _id,
+      pickupDate,
+      returnDate,
+
+      // ✅ FINAL PRICE (IMPORTANT)
+      price: totalPrice,
+
+      offerCode: offerData?.code || null,
+      discountType: offerData?.discountType || null,
+      discountValue: offerData?.discountValue || null,
+      discountAmount
+    });
+
+    res.json({ success: true, message: "Booking Created" });
+
+  } catch (error) {
+    console.log(error.message);
+    res.json({ success: false, message: error.message });
+  }
+};
 
 // API to List User Bookings 
 export const getUserBookings = async (req, res)=>{

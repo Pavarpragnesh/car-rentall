@@ -87,3 +87,30 @@ export const toggleOffer = async (req, res) => {
     res.json({ success: false, message: error.message });
   }
 };
+
+// ✅ APPLY OFFER (VALIDATE)
+export const applyOffer = async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    const offer = await Offer.findOne({ code });
+
+    if (!offer) {
+      return res.json({ success: false, message: "Invalid offer code" });
+    }
+
+    const today = new Date();
+
+    if (!offer.isActive) {
+      return res.json({ success: false, message: "Offer not active" });
+    }
+
+    if (today < offer.startDate || today > offer.endDate) {
+      return res.json({ success: false, message: "Offer expired" });
+    }
+
+    res.json({ success: true, offer });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};

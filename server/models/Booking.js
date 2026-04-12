@@ -9,6 +9,11 @@ const bookingSchema = new mongoose.Schema({
     returnDate: {type: Date, required: true},
     status: {type: String, enum: ["pending", "confirmed", "cancelled"], default: "pending"},
     price: {type: Number, required: true},
+     // ✅ NEW OFFER FIELDS
+    offerCode: { type: String },
+    discountType: { type: String, enum: ["flat", "percentage"] },
+    discountValue: { type: Number },
+    discountAmount: { type: Number },
      // ✅ NEW
     rating: { type: Number, min: 1, max: 5 },
     review: { type: String }
