@@ -49,6 +49,7 @@ const Bookings = () => {
                 <th>Owner</th>
                 <th>Pickup</th>
                 <th>Return</th>
+                <th>discountAmount</th>
                 <th>Price</th>
                 <th>Reting</th>
                 <th>Status</th>
@@ -84,7 +85,7 @@ const Bookings = () => {
                   <td>
                     {new Date(item.returnDate).toLocaleDateString()}
                   </td>
-
+                   <td>₹{item.discountAmount}</td>
                   <td>₹{item.price}</td>
 
                   {/* ⭐ Rating & Review */}

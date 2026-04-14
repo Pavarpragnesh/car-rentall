@@ -21,7 +21,23 @@ const CarDetails = () => {
 
   const [agreeTerms, setAgreeTerms] = useState(false)
 
-  // ✅ APPLY OFFER
+  // ✅ FIX: CALCULATE DAYS (IMPORTANT)
+  const getDays = () => {
+    if (!pickupDate || !returnDate) return 1
+
+    const start = new Date(pickupDate)
+    const end = new Date(returnDate)
+
+    let days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1
+
+    if (days <= 0) days = 1
+
+    return days
+  }
+
+  const days = getDays()
+
+  // ✅ OFFER APPLY (UPDATED)
   const handleApplyOffer = async () => {
     if (!offerCode) return toast.error("Enter offer code")
 
@@ -31,17 +47,16 @@ const CarDetails = () => {
       if (data.success) {
         const offer = data.offer
 
+        let total = car.pricePerDay * days
         let discount = 0
 
         if (offer.discountType === "flat") {
           discount = offer.discountValue
         } else {
-          discount = (car.pricePerDay * offer.discountValue) / 100
+          discount = (total * offer.discountValue) / 100
         }
 
-        if (discount > car.pricePerDay) {
-          discount = car.pricePerDay
-        }
+        if (discount > total) discount = total
 
         setAppliedOffer(offer)
         setDiscountAmount(discount)
@@ -61,12 +76,18 @@ const CarDetails = () => {
     setOfferCode("")
   }
 
-  const finalPrice = car ? car.pricePerDay - discountAmount : 0
+  // ✅ FIXED TOTAL PRICE
+  const totalPrice = car ? car.pricePerDay * days : 0
+  const finalPrice = totalPrice - discountAmount
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
     if (!agreeTerms) return toast.error("Accept Terms")
+
+    if (returnDate < pickupDate) {
+      return toast.error("Invalid dates")
+    }
 
     try {
       const { data } = await axios.post('/api/bookings/create', {
@@ -131,16 +152,26 @@ const CarDetails = () => {
         {/* RIGHT */}
         <motion.form onSubmit={handleSubmit} className='sticky top-20 bg-white shadow-xl rounded-2xl p-6 space-y-6'>
 
-          {/* PRICE */}
+          {/* PRICE (UNCHANGED DESIGN) */}
           <div>
             {appliedOffer ? (
               <>
-                <p className='line-through text-gray-400'>{currency}{car.pricePerDay}</p>
-                <p className='text-3xl font-bold text-green-600'>{currency}{finalPrice}</p>
-                <p className='text-sm text-green-600'>You saved {currency}{discountAmount}</p>
+                <p className='line-through text-gray-400'>
+                  {currency}{totalPrice}
+                </p>
+
+                <p className='text-3xl font-bold text-green-600'>
+                  {currency}{finalPrice}
+                </p>
+
+                <p className='text-sm text-green-600'>
+                  You saved {currency}{discountAmount}
+                </p>
               </>
             ) : (
-              <p className='text-3xl font-bold'>{currency}{car.pricePerDay}</p>
+              <p className='text-3xl font-bold'>
+                {currency}{totalPrice}
+              </p>
             )}
           </div>
 
@@ -157,7 +188,7 @@ const CarDetails = () => {
             </div>
           </div>
 
-          {/* OFFER */}
+          {/* OFFER (UNCHANGED UI) */}
           <div className='bg-gray-50 p-4 rounded-xl space-y-3'>
             <label className='text-sm font-medium'>Offer Code</label>
 
@@ -181,7 +212,9 @@ const CarDetails = () => {
               )}
             </div>
 
-            {appliedOffer && <p className='text-green-600 text-sm'>✓ {appliedOffer.code} applied</p>}
+            {appliedOffer && (
+              <p className='text-green-600 text-sm'>✓ {appliedOffer.code} applied</p>
+            )}
           </div>
 
           {/* TERMS */}
