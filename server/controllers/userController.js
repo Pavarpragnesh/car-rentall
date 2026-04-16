@@ -52,18 +52,26 @@ export const registerUser = async (req, res)=>{
 
 
 // ✅ Login User (ADMIN INCLUDED)
-export const loginUser = async (req, res)=>{
+export const loginUser = async (req, res) => {
     try {
-        const {email, password} = req.body
+        const { email, password } = req.body
 
-        const user = await User.findOne({email})
-        if(!user){
-            return res.json({success: false, message: "User not found"})
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.json({ success: false, message: "User not found" })
+        }
+
+        // ✅ CHECK ACTIVE STATUS (MAIN FIX)
+        if (user.active === false) {
+            return res.json({
+                success: false,
+                message: "Your account is blocked by admin"
+            })
         }
 
         const isMatch = await bcrypt.compare(password, user.password)
-        if(!isMatch){
-            return res.json({success: false, message: "Invalid Credentials"})
+        if (!isMatch) {
+            return res.json({ success: false, message: "Invalid Credentials" })
         }
 
         const token = generateToken(user)
@@ -71,15 +79,14 @@ export const loginUser = async (req, res)=>{
         res.json({
             success: true,
             token,
-            role: user.role   // ✅ important for frontend
+            role: user.role
         })
 
     } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
+        console.log(error.message)
+        res.json({ success: false, message: error.message })
     }
 }
-
 
 // ✅ Get User Data (Protected)
 export const getUserData = async (req, res) =>{
