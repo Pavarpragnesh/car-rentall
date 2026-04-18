@@ -38,7 +38,7 @@ const ManageCars = () => {
 
   const deleteCar = async (carId) => {
     try {
-      const confirm = window.confirm('Are you sure you want to delete this car?')
+      const confirm = window.confirm('Delete this car permanently?')
       if (!confirm) return
 
       const { data } = await axios.post('/api/owner/delete-car', { carId })
@@ -54,64 +54,94 @@ const ManageCars = () => {
   }
 
   useEffect(() => {
-    if (isOwner) {
-      fetchOwnerCars()
-    }
+    if (isOwner) fetchOwnerCars()
   }, [isOwner])
 
   return (
-    <div className='px-4 pt-10 md:px-10 w-full'>
+  <div className='px-4 md:px-10 py-10 w-full bg-gray-50 min-h-screen'>
 
-      <Title
-        title="Manage Cars"
-        subTitle="View all listed cars, update their details, or remove them from the booking platform."
-      />
+    <Title
+      title="Manage Cars"
+      subTitle="View, update or remove cars from your platform."
+    />
 
-      <div className='max-w-4xl w-full rounded-md overflow-hidden border border-borderColor mt-6'>
+    <div className='bg-white shadow-md rounded-xl mt-8 border overflow-hidden'>
 
-        <table className='w-full border-collapse text-left text-sm text-gray-600'>
-          <thead className='text-gray-500'>
+      <div className="overflow-x-auto">
+        <table className='w-full text-sm text-gray-700'>
+
+          {/* HEADER */}
+          <thead className='bg-gray-100 text-gray-600 text-xs uppercase'>
             <tr>
-              <th className="p-3 font-medium">Car</th>
-              <th className="p-3 font-medium max-md:hidden">Category</th>
-              <th className="p-3 font-medium">Price</th>
-              <th className="p-3 font-medium">Rating</th> {/* NEW */}
-              <th className="p-3 font-medium max-md:hidden">Status</th>
-              <th className="p-3 font-medium">Actions</th>
+              <th className="p-4 text-center w-12">#</th>
+              <th className="p-4 text-left">Car</th>
+              <th className="p-4 max-md:hidden">Category</th>
+              <th className="p-4 max-md:hidden">Year</th>
+              <th className="p-4 max-md:hidden">Fuel</th>
+              <th className="p-4 max-md:hidden">Location</th>
+              <th className="p-4">Price</th>
+              <th className="p-4">Rating</th>
+              <th className="p-4 max-md:hidden">Status</th>
+              <th className="p-4 text-center">Actions</th>
             </tr>
           </thead>
 
+          {/* BODY */}
           <tbody>
-            {cars.map((car, index) => (
-              <tr key={index} className='border-t border-borderColor'>
+            {cars.length > 0 ? cars.map((car, index) => (
+              <tr
+                key={index}
+                className='border-t hover:bg-gray-50 transition'
+              >
 
-                {/* Car Info */}
-                <td className='p-3 flex items-center gap-3'>
-                  <img
-                    src={car.image}
-                    alt=""
-                    className="h-12 w-12 aspect-square rounded-md object-cover"
-                  />
-                  <div className='max-md:hidden'>
-                    <p className='font-medium'>{car.brand} {car.model}</p>
-                    <p className='text-xs text-gray-500'>
-                      {car.seating_capacity} • {car.transmission}
-                    </p>
+                {/* INDEX */}
+                <td className='p-4 text-center font-medium text-gray-500'>
+                  {index + 1}
+                </td>
+
+                {/* CAR */}
+                <td className='p-4'>
+                  <div className='flex items-center gap-3'>
+
+                    {/* IMAGE */}
+                    <div className='h-14 w-14 flex-shrink-0'>
+                      <img
+                        src={car.image || "/placeholder-car.png"}
+                        onError={(e) => (e.target.src = "/placeholder-car.png")}
+                        className="h-full w-full rounded-lg object-cover border"
+                        alt=""
+                      />
+                    </div>
+
+                    {/* TEXT */}
+                    <div>
+                      <p className='font-semibold text-gray-800'>
+                        {car.brand} {car.model}
+                      </p>
+                      <p className='text-xs text-gray-500'>
+                        {car.seating_capacity} Seats • {car.transmission}
+                      </p>
+                    </div>
+
                   </div>
                 </td>
 
-                {/* Category */}
-                <td className='p-3 max-md:hidden'>{car.category}</td>
+                <td className='p-4 max-md:hidden'>{car.category}</td>
+                <td className='p-4 max-md:hidden'>{car.year}</td>
+                <td className='p-4 max-md:hidden'>{car.fuel_type}</td>
+                <td className='p-4 max-md:hidden'>{car.location}</td>
 
-                {/* Price */}
-                <td className='p-3'>{currency}{car.pricePerDay}/day</td>
+                {/* PRICE */}
+                <td className='p-4 font-medium'>
+                  {currency}{car.pricePerDay}
+                  <span className='text-xs text-gray-400'> /day</span>
+                </td>
 
-                {/* ⭐ Rating */}
-                <td className='p-3'>
+                {/* RATING */}
+                <td className='p-4'>
                   {car.avgRating > 0 ? (
-                    <div className="flex items-center gap-1">
-                      <span className="text-yellow-500">⭐</span>
-                      <span>{car.avgRating}</span>
+                    <div className="flex items-center gap-1 text-yellow-500 font-medium">
+                      ⭐ {car.avgRating}
                       <span className="text-xs text-gray-400">
                         ({car.totalReviews})
                       </span>
@@ -121,51 +151,63 @@ const ManageCars = () => {
                   )}
                 </td>
 
-                {/* Status */}
-                <td className='p-3 max-md:hidden'>
-                  <span className={`px-3 py-1 rounded-full text-xs ${car.isAvaliable
-                      ? 'bg-green-100 text-green-500'
-                      : 'bg-red-100 text-red-500'
+                {/* STATUS */}
+                <td className='p-4 max-md:hidden'>
+                  <span className={`px-3 py-1 rounded-full text-xs font-medium
+                    ${car.isAvaliable
+                      ? 'bg-green-100 text-green-600'
+                      : 'bg-red-100 text-red-600'
                     }`}>
                     {car.isAvaliable ? "Available" : "Unavailable"}
                   </span>
                 </td>
 
-                {/* Actions */}
-                <td className='flex items-center gap-3 p-3'>
+                {/* ACTIONS */}
+                <td className='p-4'>
+                  <div className='flex items-center justify-center gap-4'>
 
-                  <img
-                    onClick={() => toggleAvailability(car._id)}
-                    src={car.isAvaliable ? assets.eye_close_icon : assets.eye_icon}
-                    alt=""
-                    className='cursor-pointer w-12'
-                  />
+                    <button
+                      onClick={() => toggleAvailability(car._id)}
+                      className='p-2 hover:bg-gray-100 rounded-md transition'
+                    >
+                      <img
+                        src={car.isAvaliable ? assets.eye_close_icon : assets.eye_icon}
+                        className='w-5'
+                        alt=""
+                      />
+                    </button>
 
-                  <img
-                    src={assets.edit_icon}
-                    alt=""
-                    className='cursor-pointer w-12'
-                  />
+                    <button className='p-2 hover:bg-blue-50 rounded-md transition'>
+                      <img src={assets.edit_icon} className='w-5' alt="" />
+                    </button>
 
-                  <img
-                    onClick={() => deleteCar(car._id)}
-                    src={assets.delete_icon}
-                    alt=""
-                    className='cursor-pointer w-12'
-                  />
+                    <button
+                      onClick={() => deleteCar(car._id)}
+                      className='p-2 hover:bg-red-50 rounded-md transition'
+                    >
+                      <img src={assets.delete_icon} className='w-5' alt="" />
+                    </button>
 
+                  </div>
                 </td>
 
               </tr>
-            ))}
+            )) : (
+              <tr>
+                <td colSpan="10" className="text-center py-12 text-gray-400">
+                  No cars found 🚗
+                </td>
+              </tr>
+            )}
           </tbody>
 
         </table>
-
       </div>
 
     </div>
-  )
+
+  </div>
+)
 }
 
 export default ManageCars
