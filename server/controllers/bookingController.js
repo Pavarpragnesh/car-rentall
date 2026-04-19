@@ -194,3 +194,45 @@ export const addRating = async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 };
+
+// ✅ GET ALL REVIEWS (TESTIMONIALS)
+export const getTestimonials = async (req, res) => {
+  try {
+    const testimonials = await Booking.aggregate([
+      {
+        $match: {
+          rating: { $ne: null } // only rated bookings
+        }
+      },
+
+      // sort by highest rating first
+      {
+        $sort: { rating: -1, createdAt: -1 }
+      },
+
+      // group by user → take first (highest rating)
+      {
+        $group: {
+          _id: "$user",
+          booking: { $first: "$$ROOT" }
+        }
+      },
+
+      {
+        $replaceRoot: { newRoot: "$booking" }
+      }
+    ]);
+
+    // populate user & car
+    const populated = await Booking.populate(testimonials, [
+      { path: "user", select: "name" },
+      { path: "car", select: "brand model" }
+    ]);
+
+    res.json({ success: true, testimonials: populated });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+

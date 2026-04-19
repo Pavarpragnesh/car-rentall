@@ -1,60 +1,121 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Title from './Title'
-import { assets } from '../assets/assets';
-import { motion } from 'motion/react';
+import { assets } from '../assets/assets'
+import { motion } from 'motion/react'
+import { useAppContext } from '../context/AppContext'
 
 const Testimonial = () => {
 
-    const testimonials = [
-        { name: "Emma Rodriguez", 
-          location: "Barcelona, Spain", 
-          image: assets.testimonial_image_1, 
-          testimonial: "I've rented cars from various companies, but the experience with CarRental was exceptional." 
-        },
-        { name: "John Smith", 
-          location: "New York, USA", 
-          image: assets.testimonial_image_2, 
-          testimonial: "CarRental made my trip so much easier. The car was delivered right to my door, and the customer service was fantastic!" 
-        },
-        { name: "Ava Johnson", 
-          location: "Sydney, Australia", 
-          image: assets.testimonial_image_1, 
-          testimonial: "I highly recommend CarRental! Their fleet is amazing, and I always feel like I'm getting the best deal with excellent service." 
-        }
-    ];
+  const { axios } = useAppContext()
+
+  const [testimonials, setTestimonials] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchTestimonials = async () => {
+    try {
+      const { data } = await axios.get('/api/bookings/testimonials')
+
+      console.log("API RESPONSE:", data) // ✅ debug
+
+      if (data.success) {
+        setTestimonials(data.testimonials || [])
+      }
+
+    } catch (error) {
+      console.log("ERROR:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchTestimonials()
+  }, [])
 
   return (
     <div className="py-28 px-6 md:px-16 lg:px-24 xl:px-44">
-            
-           <Title title="What Our Customers Say" subTitle="Discover why discerning travelers choose StayVenture for their luxury accommodations around the world."/>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-18">
-                {testimonials.map((testimonial, index) => (
-                    <motion.div 
-                    initial={{ opacity: 0, y: 40 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: index * 0.2, ease: 'easeOut' }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    
-                    key={index} className="bg-white p-6 rounded-xl shadow-lg hover:-translate-y-1 transition-all duration-500">
+      {/* TITLE */}
+      <Title 
+        title="What Our Customers Say" 
+        subTitle="Real experiences from our users."
+      />
 
-                        <div className="flex items-center gap-3">
-                            <img className="w-12 h-12 rounded-full" src={testimonial.image} alt={testimonial.name} />
-                            <div>
-                                <p className="text-xl">{testimonial.name}</p>
-                                <p className="text-gray-500">{testimonial.location}</p>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1 mt-4">
-                            {Array(5).fill(0).map((_, index) => (
-                                <img key={index} src={assets.star_icon} alt="star-icon" />
-                            ))}
-                        </div>
-                        <p className="text-gray-500 max-w-90 mt-4 font-light">"{testimonial.testimonial}"</p>
-                    </motion.div>
-                ))}
+      {/* LOADING */}
+      {loading && (
+        <p className="text-center mt-10 text-gray-500">
+          Loading testimonials...
+        </p>
+      )}
+
+      {/* NO DATA */}
+      {!loading && testimonials.length === 0 && (
+        <p className="text-center mt-10 text-gray-500">
+          No reviews available yet
+        </p>
+      )}
+
+      {/* TESTIMONIAL GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
+
+        {testimonials.map((item, index) => (
+
+          <motion.div
+            key={item._id}
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.15 }}
+            viewport={{ once: true }}
+            className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300"
+          >
+
+            {/* USER INFO */}
+            <div className="flex items-center gap-3">
+              <img
+                src={assets.user_icon}
+                alt="user"
+                className="w-12 h-12 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-lg font-semibold">
+                  {item.user?.name || "Anonymous"}
+                </p>
+                <p className="text-sm text-gray-500">
+                  {item.car?.brand} {item.car?.model}
+                </p>
+              </div>
             </div>
-        </div>
+
+           {/* ⭐ RATING */}
+            <div className="flex items-center gap-1 mt-4">
+            {[1,2,3,4,5].map((star) => (
+                <svg
+                key={star}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill={star <= item.rating ? "#facc15" : "#e5e7eb"} // yellow / gray
+                className="w-4 h-4"
+                >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.974a1 1 0 00.95.69h4.18c.969 0 1.371 1.24.588 1.81l-3.385 2.46a1 1 0 00-.364 1.118l1.287 3.974c.3.921-.755 1.688-1.54 1.118l-3.386-2.46a1 1 0 00-1.175 0l-3.386 2.46c-.784.57-1.838-.197-1.539-1.118l1.287-3.974a1 1 0 00-.364-1.118L2.045 9.4c-.783-.57-.38-1.81.588-1.81h4.18a1 1 0 00.95-.69l1.286-3.974z" />
+                </svg>
+            ))}
+            </div>
+
+            {/* REVIEW */}
+            <p className="text-gray-600 mt-4 text-sm leading-relaxed">
+              "{item.review || "No review provided"}"
+            </p>
+
+            {/* DATE (optional) */}
+            <p className="text-xs text-gray-400 mt-3">
+              {new Date(item.createdAt).toLocaleDateString()}
+            </p>
+
+          </motion.div>
+        ))}
+
+      </div>
+    </div>
   )
 }
 
