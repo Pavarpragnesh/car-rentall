@@ -51,26 +51,41 @@ export const registerUser = async (req, res)=>{
 }
 
 
-// ✅ Login User (ADMIN INCLUDED)
 //✅ Login User (ADMIN INCLUDED)
-export const loginUser = async (req, res)=>
-    { try 
-        { const {email, password} = req.body 
-    const user = await User.findOne({email}) 
-    if(!user){ 
-        return res.json({success: false, message: "User not found"})
-     } 
-     const isMatch = await bcrypt.compare(password, user.password) 
-     if(!isMatch){
-         return res.json({success: false, message: "Invalid Credentials"}) 
-        } 
-        const token = generateToken(user) 
-        res.json({ success: true, token, role: user.role // ✅ important for frontend 
-        }) 
-    } catch (error) { 
-        console.log(error.message); 
-        res.json({success: false, message: error.message}) 
-    } 
+export const loginUser = async (req, res) => {
+    try {
+        const { email, password } = req.body
+
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.json({ success: false, message: "User not found" })
+        }
+
+        // ✅ CHECK ACTIVE STATUS (MAIN FIX)
+        if (user.active === false) {
+            return res.json({
+                success: false,
+                message: "Your user id is blocked by admin"
+            })
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password)
+        if (!isMatch) {
+            return res.json({ success: false, message: "Invalid Credentials" })
+        }
+
+        const token = generateToken(user)
+
+        res.json({
+            success: true,
+            token,
+            role: user.role
+        })
+
+    } catch (error) {
+        console.log(error.message)
+        res.json({ success: false, message: error.message })
+    }
 }
 
 // ✅ Get User Data (Protected)

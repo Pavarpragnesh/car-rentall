@@ -172,20 +172,20 @@ const ManageCars = () => {
                     >
                       <img
                         src={car.isAvaliable ? assets.eye_close_icon : assets.eye_icon}
-                        className='w-5'
+                        className='w-15'
                         alt=""
                       />
                     </button>
 
                     <button className='p-2 hover:bg-blue-50 rounded-md transition'>
-                      <img src={assets.edit_icon} className='w-5' alt="" />
+                      <img src={assets.edit_icon} className='w-15' alt="" />
                     </button>
 
                     <button
                       onClick={() => deleteCar(car._id)}
                       className='p-2 hover:bg-red-50 rounded-md transition'
                     >
-                      <img src={assets.delete_icon} className='w-5' alt="" />
+                      <img src={assets.delete_icon} className='w-15' alt="" />
                     </button>
 
                   </div>
