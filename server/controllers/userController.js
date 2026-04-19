@@ -3,7 +3,6 @@ import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import Car from "../models/Car.js";
 
-
 // ✅ Generate JWT Token (WITH ROLE)
 const generateToken = (user)=>{
     return jwt.sign(
@@ -12,7 +11,6 @@ const generateToken = (user)=>{
         { expiresIn: "7d" }
     )
 }
-
 
 // ✅ Register User
 export const registerUser = async (req, res)=>{
@@ -49,7 +47,6 @@ export const registerUser = async (req, res)=>{
         res.json({success: false, message: error.message})
     }
 }
-
 
 //✅ Login User (ADMIN INCLUDED)
 export const loginUser = async (req, res) => {
@@ -97,7 +94,6 @@ export const getUserData = async (req, res) =>{
         res.json({success: false, message: error.message})
     }
 }
-
 
 // ✅ Get All Cars
 export const getCars = async (req, res) =>{
