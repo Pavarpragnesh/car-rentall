@@ -218,3 +218,30 @@ export const updateUserImage = async (req, res)=>{
         res.json({success: false, message: error.message})
     }
 }   
+
+export const updateCar = async (req, res) => {
+  try {
+    const { carId } = req.body
+    const carData = JSON.parse(req.body.carData)
+
+    const car = await Car.findById(carId)
+
+    if (!car) {
+      return res.json({ success: false, message: "Car not found" })
+    }
+
+    // update fields
+    Object.assign(car, carData)
+
+    if (req.file) {
+      car.image = req.file.path
+    }
+
+    await car.save()
+
+    res.json({ success: true, message: "Car updated successfully" })
+
+  } catch (error) {
+    res.json({ success: false, message: error.message })
+  }
+}
