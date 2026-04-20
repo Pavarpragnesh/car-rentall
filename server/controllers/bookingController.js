@@ -236,3 +236,38 @@ export const getTestimonials = async (req, res) => {
   }
 };
 
+// ✅ GET OWNER CARS WITH RATING
+export const getOwnerCars = async (req, res) => {
+  try {
+    const cars = await Car.find({ owner: req.user._id });
+
+    const result = await Promise.all(
+      cars.map(async (car) => {
+
+        const ratings = await Booking.find({
+          car: car._id,
+          rating: { $ne: null }
+        });
+
+        const totalReviews = ratings.length;
+
+        const avgRating =
+          totalReviews > 0
+            ? ratings.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+            : 0;
+
+        return {
+          ...car._doc,
+          avgRating: Number(avgRating.toFixed(1)),
+          totalReviews
+        };
+      })
+    );
+
+    res.json({ success: true, cars: result });
+
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
+
