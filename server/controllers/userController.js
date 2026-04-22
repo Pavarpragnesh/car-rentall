@@ -85,6 +85,44 @@ export const loginUser = async (req, res) => {
     }
 }
 
+// ✅ Forgot Password (Simple)
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email, newPassword } = req.body;
+
+        if (!email || !newPassword || newPassword.length < 8) {
+            return res.json({
+                success: false,
+                message: "Email and valid new password required (min 8 chars)"
+            });
+        }
+
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        // 🔐 Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        user.password = hashedPassword;
+        await user.save();
+
+        res.json({
+            success: true,
+            message: "Password updated successfully"
+        });
+
+    } catch (error) {
+        console.log(error.message);
+        res.json({ success: false, message: error.message });
+    }
+};
+
 // ✅ Get User Data (Protected)
 export const getUserData = async (req, res) =>{
     try {

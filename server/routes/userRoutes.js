@@ -3,7 +3,8 @@ import {
     getCars,
     getUserData,
     loginUser,
-    registerUser
+    registerUser,
+    forgotPassword
 } from "../controllers/userController.js";
 
 import { protect, adminOnly } from "../middleware/auth.js";
@@ -30,5 +31,7 @@ userRouter.get('/admin/users', protect, adminOnly, async (req, res) => {
         res.json({ success: false, message: error.message });
     }
 });
+
+userRouter.post('/forgot-password', forgotPassword);
 
 export default userRouter;

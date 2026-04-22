@@ -1,3 +1,4 @@
+
 import React from 'react'
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
@@ -15,28 +16,42 @@ const Login = () => {
         try {
             event.preventDefault();
 
-            const { data } = await axios.post(`/api/user/${state}`, {
-                name,
-                email,
-                password
-            });
+            let url = `/api/user/${state}`;
+
+            if (state === "forgot") {
+                url = "/api/user/forgot-password";
+            }
+
+            const payload =
+                state === "register"
+                    ? { name, email, password }
+                    : state === "forgot"
+                    ? { email, newPassword: password }
+                    : { email, password };
+
+            const { data } = await axios.post(url, payload);
 
             if (data.success) {
 
-                // ✅ Save token
+                // ✅ Forgot Password
+                if (state === "forgot") {
+                    toast.success("Password updated! Please login.");
+                    setState("login");
+                    setPassword("");
+                    return;
+                }
+
+                // ✅ Normal Login/Register
                 setToken(data.token)
                 localStorage.setItem('token', data.token)
-
-                // ✅ Save user role (optional but useful)
                 setUser({ role: data.role })
 
-                // ✅ REDIRECT BASED ON ROLE
                 if (data.role === "admin") {
-                    navigate('/admin')   // 👑 Admin Dashboard
+                    navigate('/admin')
                 } else if (data.role === "owner") {
-                    navigate('/owner')   // Owner Dashboard
+                    navigate('/owner')
                 } else {
-                    navigate('/')        // Normal User
+                    navigate('/')
                 }
 
                 setShowLogin(false)
@@ -56,9 +71,10 @@ const Login = () => {
             <form onSubmit={onSubmitHandler} onClick={(e)=>e.stopPropagation()} className="flex flex-col gap-4 m-auto items-start p-8 py-12 w-80 sm:w-[352px] rounded-lg shadow-xl border border-gray-200 bg-white">
 
                 <p className="text-2xl font-medium m-auto">
-                    <span className="text-primary">User</span> {state === "login" ? "Login" : "Sign Up"}
+                    <span className="text-primary">User</span> {state === "login" ? "Login" : state === "register" ? "Sign Up" : "Forgot Password"}
                 </p>
 
+                {/* Name (only register) */}
                 {state === "register" && (
                     <div className="w-full">
                         <p>Name</p>
@@ -73,6 +89,7 @@ const Login = () => {
                     </div>
                 )}
 
+                {/* Email */}
                 <div className="w-full">
                     <p>Email</p>
                     <input
@@ -85,8 +102,9 @@ const Login = () => {
                     />
                 </div>
 
+                {/* Password / New Password */}
                 <div className="w-full">
-                    <p>Password</p>
+                    <p>{state === "forgot" ? "New Password" : "Password"}</p>
                     <input
                         onChange={(e) => setPassword(e.target.value)}
                         value={password}
@@ -97,6 +115,20 @@ const Login = () => {
                     />
                 </div>
 
+                {/* ✅ Forgot Password LINK (ONLY ADDED) */}
+                {state === "login" && (
+                    <p
+                        onClick={() => {
+                            setState("forgot");
+                            setPassword("");
+                        }}
+                        className="text-primary cursor-pointer text-xs"
+                    >
+                        Forgot Password?
+                    </p>
+                )}
+
+                {/* Switch */}
                 {state === "register" ? (
                     <p>
                         Already have account?{" "}
@@ -104,17 +136,28 @@ const Login = () => {
                             click here
                         </span>
                     </p>
-                ) : (
+                ) : state === "login" ? (
                     <p>
                         Create an account?{" "}
                         <span onClick={() => setState("register")} className="text-primary cursor-pointer">
                             click here
                         </span>
                     </p>
+                ) : (
+                    <p>
+                        Back to{" "}
+                        <span onClick={() => setState("login")} className="text-primary cursor-pointer">
+                            Login
+                        </span>
+                    </p>
                 )}
 
                 <button className="bg-primary hover:bg-blue-800 transition-all text-white w-full py-2 rounded-md cursor-pointer">
-                    {state === "register" ? "Create Account" : "Login"}
+                    {state === "register"
+                        ? "Create Account"
+                        : state === "forgot"
+                        ? "Update Password"
+                        : "Login"}
                 </button>
 
             </form>
@@ -123,3 +166,4 @@ const Login = () => {
 }
 
 export default Login
+
